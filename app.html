@@ -738,7 +738,7 @@
 </div>
 
 <script>
-  const SUPABASE_URL  = 'https://rgxzeitxshymedwnkzsg.supabase.co/functions/v1/register';
+  const SUPABASE_URL  = 'https://rgxzeitxshymedwnkzsg.supabase.co';
   const SUPABASE_ANON = 'sb_publishable_rUqjdgyRie2aS1jX-RIGbw_QznV1Zbm';
 
   // ── session guard ──
@@ -915,7 +915,7 @@
   // ── supabase fetch helpers ──
   async function sbGet(table, order = 'created_at') {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/${table}?order=${order}.asc`,
+      `${SUPABASE_URL}/v1/${table}?order=${order}.asc`,
       { headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
     );
     if (!res.ok) throw new Error(`Failed to fetch ${table}`);
