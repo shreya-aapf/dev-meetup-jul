@@ -1010,7 +1010,7 @@
   // ── conflicts ──
   async function loadConflicts() {
     try {
-      const conflicts = await sbGet('conflicts');
+      const conflicts = await sbGet('conflicts', 'task_id');
       const unresolved = conflicts.filter(c => !c.resolved);
       document.getElementById('count-conflicts').textContent = unresolved.length || '';
 
