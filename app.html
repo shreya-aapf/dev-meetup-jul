@@ -915,7 +915,7 @@
   // ── supabase fetch helpers ──
   async function sbGet(table, order = 'created_at') {
     const res = await fetch(
-      `${SUPABASE_URL}/v1/${table}?order=${order}.asc`,
+      `${SUPABASE_URL}/rest/v1/${table}?order=${order}.asc`,
       { headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
     );
     if (!res.ok) throw new Error(`Failed to fetch ${table}`);
