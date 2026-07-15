@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MeetingMind — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #faf9f7;
+      --surface:      #ffffff;
+      --surface-2:    #f3f1ee;
+      --border:       #e8e4de;
+      --muted:        #c4bdb4;
+      --subtle:       #8a8178;
+      --body:         #3d3830;
+      --bright:       #1a1612;
+      --purple:       #6c3fc5;
+      --purple-dim:   #ede8f7;
+      --purple-mid:   #9b72e0;
+      --orange:       #d95e1a;
+      --orange-dim:   #fdf0e8;
+      --success:      #1a9e6e;
+      --success-dim:  #e6f7f2;
+      --danger:       #c93030;
+      --danger-dim:   #fdeaea;
+      --warning:      #b87d0e;
+      --warning-dim:  #fdf6e3;
+      --mono:         'IBM Plex Mono', monospace;
+      --sans:         'Inter', sans-serif;
+      --radius:       8px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--body);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── top nav ── */
+    .nav {
+      height: 52px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 16px; }
+
+    .wordmark {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      color: var(--purple);
+      text-transform: uppercase;
+    }
+
+    .nav-divider {
+      width: 1px;
+      height: 16px;
+      background: var(--border);
+    }
+
+    .nav-project {
+      font-size: 13px;
+      color: var(--subtle);
+    }
+
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+
+    .nav-user {
+      font-size: 12px;
+      font-family: var(--mono);
+      color: var(--subtle);
+    }
+
+    .btn-signout {
+      font-size: 12px;
+      color: var(--subtle);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-family: var(--sans);
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .btn-signout:hover { color: var(--danger); border-color: var(--danger); }
+
+    /* ── layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      grid-template-rows: 1fr;
+      height: calc(100vh - 52px);
+    }
+
+    /* ── left sidebar ── */
+    .sidebar {
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-section {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    /* api key area */
+    .api-key-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .api-key-display {
+      flex: 1;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--subtle);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 6px 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+      font-family: var(--sans);
+    }
+
+    .btn-sm:hover { opacity: 0.82; }
+    .btn-sm:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-purple { background: var(--purple); color: #fff; }
+    .btn-orange { background: var(--orange); color: #fff; }
+    .btn-ghost {
+      background: var(--surface-2);
+      color: var(--body);
+      border: 1px solid var(--border);
+    }
+
+    /* transcript area */
+    .transcript-box {
+      width: 100%;
+      min-height: 140px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--body);
+      line-height: 1.7;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .transcript-box:focus { border-color: var(--purple); }
+    .transcript-box::placeholder { color: var(--muted); }
+
+    .transcript-meta {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
+      min-height: 14px;
+    }
+
+    .transcript-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    /* agent log */
+    .agent-log {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    .log-entry {
+      display: flex;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.5;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .log-entry:last-child { border-bottom: none; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .log-time { color: var(--muted); flex-shrink: 0; width: 42px; }
+    .log-icon { flex-shrink: 0; width: 16px; }
+    .log-msg  { color: var(--body); flex: 1; }
+    .log-msg.purple { color: var(--purple); }
+    .log-msg.orange { color: var(--orange); }
+    .log-msg.success { color: var(--success); }
+    .log-msg.danger  { color: var(--danger); }
+
+    .log-empty {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 8px 0;
+    }
+
+    /* status pill */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      font-family: var(--mono);
+    }
+
+    .status-pill .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .pill-idle    { background: var(--surface-2); color: var(--subtle); }
+    .pill-running { background: var(--purple-dim); color: var(--purple); }
+    .pill-done    { background: var(--success-dim); color: var(--success); }
+    .pill-error   { background: var(--danger-dim); color: var(--danger); }
+
+    .pill-running .dot { animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* ── main panel ── */
+    .main {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* tabs */
+    .tab-bar {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      padding: 14px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--subtle);
+      cursor: pointer;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--sans);
+    }
+
+    .tab-btn.active { color: var(--purple); border-bottom-color: var(--purple); }
+    .tab-btn:hover:not(.active) { color: var(--body); }
+
+    .tab-count {
+      background: var(--purple-dim);
+      color: var(--purple);
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 7px;
+      font-family: var(--mono);
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .tab-count.orange { background: var(--orange-dim); color: var(--orange); }
+
+    /* tab panels */
+    .tab-panel { display: none; flex: 1; overflow-y: auto; padding: 24px; }
+    .tab-panel.active { display: block; }
+
+    /* tables */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .data-table th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 12px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      color: var(--body);
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+
+    .data-table tr.agent-new td {
+      background: var(--purple-dim);
+      animation: rowFlash 1.5s ease forwards;
+    }
+
+    .data-table tr.agent-updated td {
+      background: var(--orange-dim);
+      animation: rowFlash 1.5s ease forwards;
+    }
+
+    @keyframes rowFlash {
+      0%   { opacity: 1; }
+      70%  { opacity: 1; }
+      100% { opacity: 1; background: transparent; }
+    }
+
+    /* status badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      font-family: var(--mono);
+      white-space: nowrap;
+    }
+
+    .badge-on_track  { background: var(--success-dim);  color: var(--success); }
+    .badge-at_risk   { background: var(--warning-dim);  color: var(--warning); }
+    .badge-delayed   { background: var(--orange-dim);   color: var(--orange); }
+    .badge-blocked   { background: var(--danger-dim);   color: var(--danger); }
+    .badge-complete  { background: var(--surface-2);    color: var(--muted); }
+    .badge-open      { background: var(--purple-dim);   color: var(--purple); }
+
+    .badge-low      { background: var(--success-dim); color: var(--success); }
+    .badge-medium   { background: var(--warning-dim); color: var(--warning); }
+    .badge-high     { background: var(--orange-dim);  color: var(--orange); }
+    .badge-critical { background: var(--danger-dim);  color: var(--danger); }
+
+    .badge-new { background: var(--purple-dim); color: var(--purple); }
+    .badge-source { background: var(--surface-2); color: var(--subtle); font-size: 10px; }
+
+    /* empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state .empty-icon { font-size: 32px; margin-bottom: 12px; }
+    .empty-state p { font-size: 13px; line-height: 1.6; max-width: 280px; margin: 0 auto; }
+
+    /* conflict cards */
+    .conflict-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--orange);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .conflict-card.resolved {
+      border-left-color: var(--success);
+      opacity: 0.6;
+    }
+
+    .conflict-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--bright);
+      margin-bottom: 4px;
+    }
+
+    .conflict-summary {
+      font-size: 12px;
+      color: var(--subtle);
+      margin-bottom: 14px;
+      line-height: 1.6;
+    }
+
+    .conflict-values {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .conflict-value {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+
+    .conflict-value-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .conflict-value-label.transcript { color: var(--purple); }
+    .conflict-value-label.channel    { color: var(--orange); }
+
+    .conflict-value-text {
+      font-size: 12px;
+      color: var(--body);
+      line-height: 1.5;
+    }
+
+    .conflict-actions { display: flex; gap: 8px; align-items: center; }
+
+    .conflict-resolved-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--success);
+    }
+
+    /* channel feed */
+    .channel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .channel-name {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--purple);
+    }
+
+    .message-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .message-item:last-child { border-bottom: none; }
+
+    .message-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--purple-dim);
+      color: var(--purple);
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-family: var(--mono);
+    }
+
+    .message-body { flex: 1; }
+
+    .message-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 3px;
+    }
+
+    .message-sender {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--bright);
+    }
+
+    .message-time {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .message-text {
+      font-size: 13px;
+      color: var(--body);
+      line-height: 1.6;
+    }
+
+    .message-processed {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--success);
+      margin-top: 4px;
+    }
+
+    .message-unprocessed {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--orange);
+      margin-top: 4px;
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--orange);
+      animation: pulse 1s infinite;
+    }
+  </style>
+</head>
+<body>
+
+<!-- nav -->
+<nav class="nav">
+  <div class="nav-left">
+    <span class="wordmark">MeetingMind</span>
+    <div class="nav-divider"></div>
+    <span class="nav-project">Q3 Infrastructure Upgrade</span>
+  </div>
+  <div class="nav-right">
+    <span class="nav-user" id="nav-username"></span>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- sidebar -->
+  <aside class="sidebar">
+
+    <!-- api key -->
+    <div class="sidebar-section">
+      <div class="section-label">Your API Key</div>
+      <div class="api-key-row">
+        <div class="api-key-display" id="api-key-display">Not generated yet</div>
+        <button class="btn-sm btn-purple" id="keybtn" onclick="generateApiKey()">Generate</button>
+      </div>
+    </div>
+
+    <!-- transcript trigger -->
+    <div class="sidebar-section">
+      <div class="section-label" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Transcript</span>
+        <span id="agent-status-pill" class="status-pill pill-idle"><span class="dot"></span>Idle</span>
+      </div>
+      <textarea
+        id="transcript-box"
+        class="transcript-box"
+        placeholder="Hit 'Get Transcript' to load a meeting recording…"
+        readonly
+      ></textarea>
+      <div id="transcript-meta" class="transcript-meta"></div>
+      <div class="transcript-actions">
+        <button class="btn-sm btn-ghost" onclick="getTranscript()">Get Transcript</button>
+        <button class="btn-sm btn-orange" id="submit-btn" onclick="submitTranscript()" disabled>Submit to Agent</button>
+      </div>
+    </div>
+
+    <!-- agent log -->
+    <div style="padding:16px 20px 8px;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div class="section-label">Agent Log</div>
+    </div>
+    <div class="agent-log" id="agent-log">
+      <div class="log-empty">No activity yet.</div>
+    </div>
+
+  </aside>
+
+  <!-- main panel -->
+  <main class="main">
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('tasks')">
+        Tasks <span class="tab-count" id="count-tasks">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('risks')">
+        Risks <span class="tab-count" id="count-risks">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('actions')">
+        Action Items <span class="tab-count" id="count-actions">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('conflicts')">
+        Conflicts <span class="tab-count orange" id="count-conflicts">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('channel')">
+        Channel Feed <span class="tab-count orange" id="count-unprocessed">0</span>
+      </button>
+    </div>
+
+    <!-- tasks -->
+    <div id="tab-tasks" class="tab-panel active">
+      <table class="data-table" id="table-tasks">
+        <thead>
+          <tr>
+            <th>Task</th>
+            <th>Owner</th>
+            <th>Status</th>
+            <th>Deadline</th>
+            <th>Notes</th>
+            <th>Updated by</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-tasks">
+          <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div><p>Loading tasks…</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- risks -->
+    <div id="tab-risks" class="tab-panel">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Risk</th>
+            <th>Severity</th>
+            <th>Raised by</th>
+            <th>Source</th>
+            <th>Recommended action</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-risks">
+          <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">⚠️</div><p>No risks flagged yet. Submit a transcript to get started.</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- action items -->
+    <div id="tab-actions" class="tab-panel">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Owner</th>
+            <th>Due</th>
+            <th>Status</th>
+            <th>Linked task</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-actions">
+          <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">✅</div><p>No action items yet.</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- conflicts -->
+    <div id="tab-conflicts" class="tab-panel">
+      <div id="conflicts-container">
+        <div class="empty-state"><div class="empty-icon">⚡</div><p>No conflicts detected. The agent will flag contradictions between transcripts and channel messages here.</p></div>
+      </div>
+    </div>
+
+    <!-- channel feed -->
+    <div id="tab-channel" class="tab-panel">
+      <div class="channel-header">
+        <span class="channel-name">#q3-infra-upgrade</span>
+        <button class="btn-sm btn-ghost" onclick="checkChannel()">Check Channel Now</button>
+      </div>
+      <div id="channel-feed">
+        <div class="empty-state"><div class="empty-icon">💬</div><p>Loading channel messages…</p></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+  const SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+
+  // ── session guard ──
+  const userId   = sessionStorage.getItem('user_id');
+  const username = sessionStorage.getItem('username');
+  let   apiKey   = sessionStorage.getItem('api_key') || '';
+  let   currentTranscriptId = null;
+
+  if (!userId) window.location.href = '/index.html';
+
+  document.getElementById('nav-username').textContent = username;
+
+  // show api key if already exists
+  if (apiKey) {
+    document.getElementById('api-key-display').textContent = apiKey;
+    document.getElementById('keybtn').textContent = 'Rotate';
+  }
+
+  // ── tab switching ──
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`.tab-btn[onclick="switchTab('${name}')"]`).classList.add('active');
+    document.getElementById(`tab-${name}`).classList.add('active');
+  }
+
+  // ── sign out ──
+  function signOut() {
+    sessionStorage.clear();
+    window.location.href = '/index.html';
+  }
+
+  // ── agent log ──
+  function log(msg, type = '') {
+    const el = document.getElementById('agent-log');
+    const empty = el.querySelector('.log-empty');
+    if (empty) empty.remove();
+
+    const now = new Date();
+    const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+    const icons = { purple:'🔵', orange:'🟠', success:'✅', danger:'🔴', '':'⚪' };
+
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.innerHTML = `
+      <span class="log-time">${time}</span>
+      <span class="log-icon">${icons[type] || '⚪'}</span>
+      <span class="log-msg ${type}">${msg}</span>
+    `;
+    el.appendChild(entry);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function setStatus(state) {
+    const pill = document.getElementById('agent-status-pill');
+    const map = {
+      idle:    ['pill-idle',    'Idle'],
+      running: ['pill-running', 'Processing'],
+      done:    ['pill-done',    'Done'],
+      error:   ['pill-error',   'Error'],
+    };
+    const [cls, label] = map[state] || map.idle;
+    pill.className = `status-pill ${cls}`;
+    pill.innerHTML = `<span class="dot"></span>${label}`;
+  }
+
+  // ── api key ──
+  async function generateApiKey() {
+    const btn = document.getElementById('keybtn');
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-api-key`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      apiKey = data.api_key;
+      sessionStorage.setItem('api_key', apiKey);
+      document.getElementById('api-key-display').textContent = apiKey;
+      btn.textContent = 'Rotate';
+      log('API key generated.', 'success');
+    } catch (e) {
+      log(`Failed to generate API key: ${e.message}`, 'danger');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ── get transcript ──
+  async function getTranscript() {
+    const box  = document.getElementById('transcript-box');
+    const meta = document.getElementById('transcript-meta');
+    const btn  = document.getElementById('submit-btn');
+
+    box.value = 'Fetching transcript…';
+    meta.textContent = '';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/get-transcript`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      currentTranscriptId = data.id;
+      box.value = data.content;
+      meta.textContent = `${data.title} · ${data.meeting_date}`;
+      btn.disabled = !apiKey;
+      log(`Loaded: ${data.title}`, 'purple');
+    } catch (e) {
+      box.value = '';
+      meta.textContent = 'Failed to load transcript.';
+      log(`Error fetching transcript: ${e.message}`, 'danger');
+    }
+  }
+
+  // ── submit transcript ──
+  async function submitTranscript() {
+    if (!apiKey) { log('Generate an API key first.', 'danger'); return; }
+    if (!currentTranscriptId) { log('Load a transcript first.', 'danger'); return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    setStatus('running');
+    log('Submitting transcript to agent…', 'purple');
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/submit-transcript`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript_id: currentTranscriptId, api_key: apiKey }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      log('Agent process triggered in Automation Anywhere.', 'purple');
+      log('Reading transcript against current task state…', '');
+      log('Checking channel messages for same time window…', '');
+      startPolling();
+    } catch (e) {
+      log(`Submission failed: ${e.message}`, 'danger');
+      setStatus('error');
+      btn.disabled = false;
+    }
+  }
+
+  // ── polling ──
+  let pollInterval = null;
+  let pollStart    = null;
+  const POLL_MS    = 3000;
+  const POLL_MAX   = 60000; // stop after 60s
+
+  function startPolling() {
+    pollStart = Date.now();
+    pollInterval = setInterval(async () => {
+      await Promise.all([loadTasks(), loadRisks(), loadActions(), loadConflicts(), loadChannel()]);
+      if (Date.now() - pollStart > POLL_MAX) stopPolling();
+    }, POLL_MS);
+  }
+
+  function stopPolling() {
+    clearInterval(pollInterval);
+    pollInterval = null;
+    setStatus('done');
+    log('Agent run complete.', 'success');
+    document.getElementById('submit-btn').disabled = false;
+  }
+
+  // ── supabase fetch helpers ──
+  async function sbGet(table, order = 'created_at') {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/${table}?order=${order}.asc`,
+      { headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` } }
+    );
+    if (!res.ok) throw new Error(`Failed to fetch ${table}`);
+    return res.json();
+  }
+
+  // ── tasks ──
+  let prevTaskStates = {};
+
+  async function loadTasks() {
+    try {
+      const tasks = await sbGet('tasks');
+      const tbody = document.getElementById('tbody-tasks');
+      document.getElementById('count-tasks').textContent = tasks.length;
+
+      if (!tasks.length) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div><p>No tasks yet.</p></div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = tasks.map(t => {
+        const prev    = prevTaskStates[t.id];
+        const isNew   = !prev;
+        const changed = prev && (prev.status !== t.status || prev.deadline !== t.deadline || prev.notes !== t.notes);
+        const rowClass = isNew ? 'agent-new' : changed ? 'agent-updated' : '';
+        const newBadge = (t.source !== 'manual' && isNew) ? `<span class="badge badge-new">new</span> ` : '';
+
+        return `<tr class="${rowClass}">
+          <td>${newBadge}<strong>${t.title}</strong></td>
+          <td>${t.owner || '<span style="color:var(--muted)">—</span>'}</td>
+          <td><span class="badge badge-${t.status}">${t.status.replace('_',' ')}</span></td>
+          <td style="font-family:var(--mono);font-size:12px">${t.deadline || '—'}</td>
+          <td style="color:var(--subtle);max-width:240px;font-size:12px">${t.notes || '—'}</td>
+          <td><span class="badge badge-source">${t.last_updated_by}</span></td>
+        </tr>`;
+      }).join('');
+
+      tasks.forEach(t => { prevTaskStates[t.id] = { ...t }; });
+    } catch (e) { log(`Error loading tasks: ${e.message}`, 'danger'); }
+  }
+
+  // ── risks ──
+  async function loadRisks() {
+    try {
+      const risks = await sbGet('risks');
+      document.getElementById('count-risks').textContent = risks.length;
+      const tbody = document.getElementById('tbody-risks');
+
+      if (!risks.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">⚠️</div><p>No risks flagged yet.</p></div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = risks.map(r => `
+        <tr>
+          <td><strong>${r.risk_description}</strong></td>
+          <td><span class="badge badge-${r.severity}">${r.severity}</span></td>
+          <td>${r.raised_by || '—'}</td>
+          <td><span class="badge badge-source">${r.source_type}</span></td>
+          <td style="color:var(--subtle);font-size:12px">${r.recommended_action || '—'}</td>
+        </tr>`).join('');
+    } catch (e) { log(`Error loading risks: ${e.message}`, 'danger'); }
+  }
+
+  // ── action items ──
+  async function loadActions() {
+    try {
+      const items = await sbGet('action_items');
+      document.getElementById('count-actions').textContent = items.length;
+      const tbody = document.getElementById('tbody-actions');
+
+      if (!items.length) {
+        tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">✅</div><p>No action items yet.</p></div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = items.map(a => `
+        <tr>
+          <td><strong>${a.description}</strong></td>
+          <td>${a.owner || '<span style="color:var(--danger);font-weight:600">Unassigned</span>'}</td>
+          <td style="font-family:var(--mono);font-size:12px">${a.due_date || '—'}</td>
+          <td><span class="badge badge-${a.status}">${a.status}</span></td>
+          <td style="color:var(--subtle);font-size:12px">${a.linked_task_id ? '↗ linked' : '—'}</td>
+        </tr>`).join('');
+    } catch (e) { log(`Error loading action items: ${e.message}`, 'danger'); }
+  }
+
+  // ── conflicts ──
+  async function loadConflicts() {
+    try {
+      const conflicts = await sbGet('conflicts');
+      const unresolved = conflicts.filter(c => !c.resolved);
+      document.getElementById('count-conflicts').textContent = unresolved.length || '';
+
+      const container = document.getElementById('conflicts-container');
+
+      if (!conflicts.length) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚡</div><p>No conflicts detected yet.</p></div>`;
+        return;
+      }
+
+      container.innerHTML = conflicts.map(c => `
+        <div class="conflict-card ${c.resolved ? 'resolved' : ''}" id="conflict-${c.id}">
+          <div class="conflict-title">
+            ${c.resolved ? '✅' : '⚠️'} ${c.field} conflict
+            ${c.resolved ? `<span style="font-size:11px;font-weight:400;color:var(--success)"> — resolved by ${c.resolved_by}</span>` : ''}
+          </div>
+          <div class="conflict-summary">${c.conflict_summary}</div>
+          <div class="conflict-values">
+            <div class="conflict-value">
+              <div class="conflict-value-label transcript">Transcript says</div>
+              <div class="conflict-value-text">${c.transcript_value}</div>
+            </div>
+            <div class="conflict-value">
+              <div class="conflict-value-label channel">Channel says</div>
+              <div class="conflict-value-text">${c.channel_value}</div>
+            </div>
+          </div>
+          ${!c.resolved ? `
+          <div class="conflict-actions">
+            <button class="btn-sm btn-purple" onclick="resolveConflict('${c.id}', 'transcript', '${c.transcript_value}')">Trust Transcript</button>
+            <button class="btn-sm btn-orange" onclick="resolveConflict('${c.id}', 'channel', '${c.channel_value}')">Trust Channel</button>
+          </div>` : `
+          <div class="conflict-resolved-label">✓ Resolved: "${c.resolution}"</div>`}
+        </div>`).join('');
+    } catch (e) { log(`Error loading conflicts: ${e.message}`, 'danger'); }
+  }
+
+  async function resolveConflict(conflictId, source, value) {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/conflicts?id=eq.${conflictId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            apikey: SUPABASE_ANON,
+            Authorization: `Bearer ${SUPABASE_ANON}`,
+            'Content-Type': 'application/json',
+            Prefer: 'return=minimal',
+          },
+          body: JSON.stringify({
+            resolved: true,
+            resolved_by: username,
+            resolution: value,
+            resolved_at: new Date().toISOString(),
+          }),
+        }
+      );
+      if (!res.ok) throw new Error('Patch failed');
+      log(`Conflict resolved: trusted ${source}. Value set to "${value}"`, 'success');
+      loadConflicts();
+      loadTasks();
+    } catch (e) {
+      log(`Failed to resolve conflict: ${e.message}`, 'danger');
+    }
+  }
+
+  // ── channel feed ──
+  async function loadChannel() {
+    try {
+      const messages = await sbGet('channel_messages', 'sent_at');
+      const unprocessed = messages.filter(m => !m.processed).length;
+      document.getElementById('count-unprocessed').textContent = unprocessed || '';
+
+      const feed = document.getElementById('channel-feed');
+
+      if (!messages.length) {
+        feed.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><p>No messages yet.</p></div>`;
+        return;
+      }
+
+      feed.innerHTML = messages.map(m => {
+        const initials = m.sender.split('.').map(p => p[0].toUpperCase()).join('');
+        const time = new Date(m.sent_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+        return `
+          <div class="message-item">
+            <div class="message-avatar">${initials}</div>
+            <div class="message-body">
+              <div class="message-meta">
+                <span class="message-sender">${m.sender}</span>
+                <span class="message-time">${time}</span>
+              </div>
+              <div class="message-text">${m.message}</div>
+              ${m.processed
+                ? `<div class="message-processed">✓ processed by agent</div>`
+                : `<div class="message-unprocessed"><span class="pulse-dot"></span>pending</div>`
+              }
+            </div>
+          </div>`;
+      }).join('');
+    } catch (e) { log(`Error loading channel: ${e.message}`, 'danger'); }
+  }
+
+  async function checkChannel() {
+    log('Checking channel for unprocessed messages…', 'orange');
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/check-channel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: apiKey }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      log(`Channel check triggered. ${data.unprocessed_count} messages queued.`, 'orange');
+      startPolling();
+    } catch (e) {
+      log(`Channel check failed: ${e.message}`, 'danger');
+    }
+  }
+
+  // ── initial load ──
+  loadTasks();
+  loadRisks();
+  loadActions();
+  loadConflicts();
+  loadChannel();
+</script>
+
+</body>
+</html>
