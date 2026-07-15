@@ -817,7 +817,11 @@
         body: JSON.stringify({ user_id: userId }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) {
+            const err = await res.text();
+            console.error(`sbGet ${table} failed:`, err);
+            throw new Error(`Failed to fetch ${table}`);
+          }
       apiKey = data.api_key;
       sessionStorage.setItem('api_key', apiKey);
       document.getElementById('api-key-display').textContent = apiKey;
